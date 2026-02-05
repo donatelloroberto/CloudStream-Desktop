@@ -1,0 +1,9 @@
+<Page x:Class="CloudStream.Desktop.Views.ExtensionsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Extensions">
+    <StackPanel Margin="20">
+        <TextBlock Text="Installed Providers" FontSize="18" FontWeight="Bold" />
+        <ListBox x:Name="ProvidersList" Margin="0,10,0,0" DisplayMemberPath="Name" />
+    </StackPanel>
+</Page>

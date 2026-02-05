@@ -1,0 +1,10 @@
+<Page x:Class="CloudStream.Desktop.Views.SettingsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Settings">
+    <StackPanel Margin="20" VerticalAlignment="Top">
+        <TextBlock Text="Settings" FontSize="18" FontWeight="Bold" Margin="0,0,0,10" />
+        <CheckBox x:Name="DarkThemeCheckBox" Content="Dark Theme" IsChecked="True" />
+        <Button Content="Clear History" Margin="0,10,0,0" Click="ClearHistory_Click" />
+    </StackPanel>
+</Page>
