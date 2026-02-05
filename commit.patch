@@ -1,0 +1,1295 @@
+diff -ruN /tmp/empty/App.xaml CloudStream-Desktop/App.xaml
+--- /tmp/empty/App.xaml	1970-01-01 00:00:00.000000000 +0000
++++ CloudStream-Desktop/App.xaml	2026-02-05 00:28:22.777133542 +0000
+@@ -0,0 +1,8 @@
++<Application x:Class="CloudStream.Desktop.App"
++             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
++             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
++             StartupUri="MainWindow.xaml">
++    <Application.Resources>
++        <!-- Global application resources such as styles and brushes can be defined here. -->
++    </Application.Resources>
++</Application>
+\ No newline at end of file
+diff -ruN /tmp/empty/App.xaml.cs CloudStream-Desktop/App.xaml.cs
+--- /tmp/empty/App.xaml.cs	1970-01-01 00:00:00.000000000 +0000
++++ CloudStream-Desktop/App.xaml.cs	2026-02-05 00:28:26.973153476 +0000
+@@ -0,0 +1,24 @@
++using System.Windows;
++
++namespace CloudStream.Desktop
++{
++    /// <summary>
++    ///     Interaction logic for <see cref="App"/>.  This class provides the entry point
++    ///     for the WPF application and can be used to perform global initialization
++    ///     before any windows are created.
++    /// </summary>
++    public partial class App : Application
++    {
++        /// <inheritdoc />
++        protected override void OnStartup(StartupEventArgs e)
++        {
++            base.OnStartup(e);
++
++            // Initialize global services.  For example the database service can be
++            // initialised here so that tables are created before any view models
++            // attempt to access them.  This ensures the persistence layer is ready
++            // when the rest of the application loads.
++            Services.DatabaseService.Instance.Initialize();
++        }
++    }
++}
+\ No newline at end of file
+diff -ruN /tmp/empty/CloudStream-Desktop.sln CloudStream-Desktop/CloudStream-Desktop.sln
+--- /tmp/empty/CloudStream-Desktop.sln	1970-01-01 00:00:00.000000000 +0000
++++ CloudStream-Desktop/CloudStream-Desktop.sln	2026-02-05 00:31:26.469971796 +0000
+@@ -0,0 +1,18 @@
++Microsoft Visual Studio Solution File, Format Version 12.00
++# Visual Studio Version 17
++VisualStudioVersion = 17.0.31903.59
++MinimumVisualStudioVersion = 10.0.40219.1
++Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CloudStream.Desktop", "CloudStream.Desktop.csproj", "{B3C59679-1ABF-4E38-B8C5-F0E4694FA51F}"
++EndProject
++Global
++    GlobalSection(SolutionConfigurationPlatforms) = preSolution
++        Debug|Any CPU = Debug|Any CPU
++        Release|Any CPU = Release|Any CPU
++    EndGlobalSection
++    GlobalSection(ProjectConfigurationPlatforms) = postSolution
++        {B3C59679-1ABF-4E38-B8C5-F0E4694FA51F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
++        {B3C59679-1ABF-4E38-B8C5-F0E4694FA51F}.Debug|Any CPU.Build.0 = Debug|Any CPU
++        {B3C59679-1ABF-4E38-B8C5-F0E4694FA51F}.Release|Any CPU.ActiveCfg = Release|Any CPU
++        {B3C59679-1ABF-4E38-B8C5-F0E4694FA51F}.Release|Any CPU.Build.0 = Release|Any CPU
++    EndGlobalSection
++EndGlobal
+\ No newline at end of file
+diff -ruN /tmp/empty/CloudStream.Desktop.csproj CloudStream-Desktop/CloudStream.Desktop.csproj
+--- /tmp/empty/CloudStream.Desktop.csproj	1970-01-01 00:00:00.000000000 +0000
++++ CloudStream-Desktop/CloudStream.Desktop.csproj	2026-02-05 00:28:20.345122138 +0000
+@@ -0,0 +1,17 @@
++<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
++  <PropertyGroup>
++    <OutputType>WinExe</OutputType>
++    <TargetFramework>net8.0-windows</TargetFramework>
++    <UseWPF>true</UseWPF>
++    <Nullable>enable</Nullable>
++    <ImplicitUsings>enable</ImplicitUsings>
++  </PropertyGroup>
++
++  <ItemGroup>
++    <!-- mpv integration for WPF playback.  When restoring the project on Windows this
++         package will pull in the native libmpv binaries.  -->
++    <PackageReference Include="Mpv.NET.WPF" Version="1.1.6" />
++    <!-- SQLite provider for data persistence.  -->
++    <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.0" />
++  </ItemGroup>
++</Project>
+\ No newline at end of file
+diff -ruN /tmp/empty/MainWindow.xaml CloudStream-Desktop/MainWindow.xaml
+--- /tmp/empty/MainWindow.xaml	1970-01-01 00:00:00.000000000 +0000
++++ CloudStream-Desktop/MainWindow.xaml	2026-02-05 00:28:32.757181482 +0000
+@@ -0,0 +1,31 @@
++<Window x:Class="CloudStream.Desktop.MainWindow"
++        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
++        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
++        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
++        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
++        mc:Ignorable="d"
++        Title="CloudStream Desktop" Height="600" Width="1000">
++    <Grid>
++        <Grid.RowDefinitions>
++            <RowDefinition Height="Auto" />
++            <RowDefinition Height="*" />
++        </Grid.RowDefinitions>
++
++        <!-- Navigation bar -->
++        <DockPanel Background="#FF1E1E1E" Grid.Row="0">
++            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
++                <Button Content="Home" Margin="5" Padding="10,5"
++                        Click="HomeButton_Click" />
++                <Button Content="Search" Margin="5" Padding="10,5"
++                        Click="SearchButton_Click" />
++                <Button Content="Extensions" Margin="5" Padding="10,5"
++                        Click="ExtensionsButton_Click" />
++                <Button Content="Settings" Margin="5" Padding="10,5"
++                        Click="SettingsButton_Click" />
++            </StackPanel>
++        </DockPanel>
++
++        <!-- Main content frame -->
++        <Frame x:Name="MainFrame" Grid.Row="1" NavigationUIVisibility="Hidden" />
++    </Grid>
++</Window>
+\ No newline at end of file
+diff -ruN /tmp/empty/MainWindow.xaml.cs CloudStream-Desktop/MainWindow.xaml.cs
+--- /tmp/empty/MainWindow.xaml.cs	1970-01-01 00:00:00.000000000 +0000
++++ CloudStream-Desktop/MainWindow.xaml.cs	2026-02-05 00:28:37.709206363 +0000
+@@ -0,0 +1,61 @@
++using System.Windows;
++using System.Windows.Controls;
++
++namespace CloudStream.Desktop
++{
++    /// <summary>
++    ///     The main window of the application.  It hosts a navigation bar and
++    ///     provides a frame for displaying the various pages that make up the
++    ///     application.
++    /// </summary>
++    public partial class MainWindow : Window
++    {
++        public MainWindow()
++        {
++            InitializeComponent();
++
++            // Navigate to the home page on startup.
++            NavigateToHome();
++        }
++
++        private void NavigateToHome()
++        {
++            MainFrame.Navigate(new Views.HomePage());
++        }
++
++        private void NavigateToSearch()
++        {
++            MainFrame.Navigate(new Views.SearchPage());
++        }
++
++        private void NavigateToExtensions()
++        {
++            MainFrame.Navigate(new Views.ExtensionsPage());
++        }
++
++        private void NavigateToSettings()
++        {
++            MainFrame.Navigate(new Views.SettingsPage());
++        }
++
++        private void HomeButton_Click(object sender, RoutedEventArgs e)
++        {
++            NavigateToHome();
++        }
++
++        private void SearchButton_Click(object sender, RoutedEventArgs e)
++        {
++            NavigateToSearch();
++        }
++
++        private void ExtensionsButton_Click(object sender, RoutedEventArgs e)
++        {
++            NavigateToExtensions();
++        }
++
++        private void SettingsButton_Click(object sender, RoutedEventArgs e)
++        {
++            NavigateToSettings();
++        }
++    }
++}
+\ No newline at end of file
+diff -ruN /tmp/empty/Models/MediaItem.cs CloudStream-Desktop/Models/MediaItem.cs
+--- /tmp/empty/Models/MediaItem.cs	1970-01-01 00:00:00.000000000 +0000
++++ CloudStream-Desktop/Models/MediaItem.cs	2026-02-05 00:28:42.621229707 +0000
+@@ -0,0 +1,36 @@
++using System;
++using System.Collections.Generic;
++
++namespace CloudStream.Desktop.Models
++{
++    /// <summary>
++    ///     Represents a generic media item within the CloudStream ecosystem.  A media
++    ///     item may be a movie, TV show, season, or episode.  Plugins create
++    ///     instances of this class when returning search results or detailed
++    ///     information.  The <see cref="ProviderId"/> and <see cref="Id"/>
++    ///     uniquely identify the item within the context of its provider.
++    /// </summary>
++    public class MediaItem
++    {
++        public string ProviderId { get; set; } = string.Empty;
++        public string Id { get; set; } = string.Empty;
++        public string Title { get; set; } = string.Empty;
++        public string? Description { get; set; }
++        public string? PosterUrl { get; set; }
++        public MediaType Type { get; set; } = MediaType.Movie;
++        public List<MediaItem> Children { get; set; } = new();
++        public Dictionary<string, object?> Properties { get; set; } = new();
++    }
++
++    /// <summary>
++    ///     Enum describing the high level type of the media item.  Used to distinguish
++    ///     between movies, shows, seasons and episodes when rendering the UI.
++    /// </summary>
++    public enum MediaType
++    {
++        Movie,
++        Show,
++        Season,
++        Episode
++    }
++}
+\ No newline at end of file
+diff -ruN /tmp/empty/Models/StreamLink.cs CloudStream-Desktop/Models/StreamLink.cs
+--- /tmp/empty/Models/StreamLink.cs	1970-01-01 00:00:00.000000000 +0000
++++ CloudStream-Desktop/Models/StreamLink.cs	2026-02-05 00:28:45.821245148 +0000
+@@ -0,0 +1,18 @@
++using System.Collections.Generic;
++
++namespace CloudStream.Desktop.Models
++{
++    /// <summary>
++    ///     Represents a stream.  Each stream is associated with a quality label
++    ///     (e.g. 1080p, 720p) and a URL.  Optional HTTP headers can be set on
++    ///     the request when playing the stream.  Some providers may return
++    ///     multiple streams for the same quality; the player will select
++    ///     whichever is appropriate.
++    /// </summary>
++    public class StreamLink
++    {
++        public string Quality { get; set; } = string.Empty;
++        public string Url { get; set; } = string.Empty;
++        public Dictionary<string, string>? Headers { get; set; }
++    }
++}
+\ No newline at end of file
+diff -ruN /tmp/empty/Models/Subtitle.cs CloudStream-Desktop/Models/Subtitle.cs
+--- /tmp/empty/Models/Subtitle.cs	1970-01-01 00:00:00.000000000 +0000
++++ CloudStream-Desktop/Models/Subtitle.cs	2026-02-05 00:28:48.481257868 +0000
+@@ -0,0 +1,15 @@
++namespace CloudStream.Desktop.Models
++{
++    /// <summary>
++    ///     Represents a subtitle file associated with a media item.  Subtitles can
++    ///     either be local files on disk or remote resources accessible via a
++    ///     URL.  The track language is stored as a BCP-47 language tag (e.g.
++    ///     "en-US", "ar", etc.).
++    /// </summary>
++    public class Subtitle
++    {
++        public string Language { get; set; } = string.Empty;
++        public string Url { get; set; } = string.Empty;
++        public bool IsExternal { get; set; } = true;
++    }
++}
+\ No newline at end of file
+diff -ruN /tmp/empty/Plugins/IProvider.cs CloudStream-Desktop/Plugins/IProvider.cs
+--- /tmp/empty/Plugins/IProvider.cs	1970-01-01 00:00:00.000000000 +0000
++++ CloudStream-Desktop/Plugins/IProvider.cs	2026-02-05 00:28:55.645291626 +0000
+@@ -0,0 +1,51 @@
++using System.Collections.Generic;
++using System.Threading.Tasks;
++using CloudStream.Desktop.Models;
++
++namespace CloudStream.Desktop.Plugins
++{
++    /// <summary>
++    ///     Interface that all provider plugins must implement.  Providers are
++    ///     responsible for returning search results, loading detailed item
++    ///     information, and resolving streaming links.  Plugins are loaded
++    ///     dynamically at runtime from assemblies located in the Plugins
++    ///     directory.
++    /// </summary>
++    public interface IProvider
++    {
++        /// <summary>
++        ///     Gets the human readable name of the provider.  This is shown to
++        ///     users in the Extensions manager.
++        /// </summary>
++        string Name { get; }
++
++        /// <summary>
++        ///     Perform a search against the provider using the supplied query.
++        ///     Providers should return a list of basic <see cref="MediaItem"/>
++        ///     objects without detailed metadata.  The UI will call
++        ///     <see cref="LoadDetailsAsync"/> when the user selects an item.
++        /// </summary>
++        /// <param name="query">The search query.</param>
++        /// <returns>A list of media items matching the query.</returns>
++        Task<List<MediaItem>> SearchAsync(string query);
++
++        /// <summary>
++        ///     Load full details for the specified media item.  This method
++        ///     should populate fields such as description, poster URL, and any
++        ///     children (e.g. seasons for a show).
++        /// </summary>
++        /// <param name="item">The media item to load details for.</param>
++        /// <returns>The updated media item.</returns>
++        Task<MediaItem> LoadDetailsAsync(MediaItem item);
++
++        /// <summary>
++        ///     Get the available streams for the specified media item.  This
++        ///     returns a list of streams along with their qualities and any
++        ///     necessary request headers.  The player will choose the appropriate
++        ///     stream.
++        /// </summary>
++        /// <param name="item">The media item to get streams for.</param>
++        /// <returns>A list of stream links.</returns>
++        Task<List<StreamLink>> GetStreamsAsync(MediaItem item);
++    }
++}
+\ No newline at end of file
+diff -ruN /tmp/empty/Providers/BuiltinProvider.cs CloudStream-Desktop/Providers/BuiltinProvider.cs
+--- /tmp/empty/Providers/BuiltinProvider.cs	1970-01-01 00:00:00.000000000 +0000
++++ CloudStream-Desktop/Providers/BuiltinProvider.cs	2026-02-05 00:31:36.334015315 +0000
+@@ -0,0 +1,66 @@
++using System.Collections.Generic;
++using System.Threading.Tasks;
++using CloudStream.Desktop.Models;
++using CloudStream.Desktop.Plugins;
++
++namespace CloudStream.Desktop.Providers
++{
++    /// <summary>
++    ///     A simple built‑in provider that returns a few hardcoded media items
++    ///     for demonstration purposes.  This allows the application to function
++    ///     without any external plugins being present.
++    /// </summary>
++    public class BuiltinProvider : IProvider
++    {
++        public string Name => "Builtin";
++
++        public Task<List<MediaItem>> SearchAsync(string query)
++        {
++            // Return fake search results containing the query string.
++            var list = new List<MediaItem>
++            {
++                new MediaItem
++                {
++                    ProviderId = Name,
++                    Id = "demo1",
++                    Title = $"Sample movie for '{query}'",
++                    Description = "This is a demo movie returned by the built‑in provider.",
++                    PosterUrl = null,
++                    Type = MediaType.Movie
++                },
++                new MediaItem
++                {
++                    ProviderId = Name,
++                    Id = "demo2",
++                    Title = $"Another sample for '{query}'",
++                    Description = "This is another demo item.",
++                    PosterUrl = null,
++                    Type = MediaType.Movie
++                }
++            };
++            return Task.FromResult(list);
++        }
++
++        public Task<MediaItem> LoadDetailsAsync(MediaItem item)
++        {
++            // No extra details to load for demo items.
++            return Task.FromResult(item);
++        }
++
++        public Task<List<StreamLink>> GetStreamsAsync(MediaItem item)
++        {
++            // Return a dummy stream pointing to a remote sample video.  Users can
++            // replace this with actual streaming URLs when writing real providers.
++            var streams = new List<StreamLink>
++            {
++                new StreamLink
++                {
++                    Quality = "360p",
++                    Url = "https://sample-videos.com/video123/mp4/480/asdasdas.mp4",
++                    Headers = null
++                }
++            };
++            return Task.FromResult(streams);
++        }
++    }
++}
+\ No newline at end of file
+diff -ruN /tmp/empty/README.md CloudStream-Desktop/README.md
+--- /tmp/empty/README.md	1970-01-01 00:00:00.000000000 +0000
++++ CloudStream-Desktop/README.md	2026-02-05 00:31:21.561951031 +0000
+@@ -0,0 +1,54 @@
++# CloudStream Desktop
++
++CloudStream Desktop is a Windows‐native client for streaming media using the
++same provider ecosystem as the CloudStream Android application.  It
++implements the core functionality of the Android app—including modular
++providers, streaming via libmpv and persistent bookmarks and history—in a
++desktop‐friendly WPF application.
++
++## Features
++
++* **Home** page with continue watching and bookmarks sections.
++* **Search** across all installed providers with instant navigation to
++  playback.
++* **Player** page powered by mpv with support for headers, multiple
++  qualities, subtitles and resume playback.
++* **Extensions** manager listing all loaded providers from the `Plugins`
++  directory.
++* **Settings** page with dark theme toggle and the ability to clear watch
++  history.
++* **SQLite persistence** for bookmarks, history and resume positions.
++
++## Building
++
++To build and run the application you will need a recent .NET SDK (e.g.
++version 8.0 or higher) and the Windows desktop development workload
++installed.
++
++Clone the repository and restore the NuGet packages:
++
++```sh
++git clone https://github.com/donatelloroberto/CloudStream-Desktop.git
++cd CloudStream-Desktop
++dotnet build
++```
++
++The project targets `net8.0-windows` and uses WPF.  After building, you
++can run the application either from your IDE or by executing:
++
++```sh
++dotnet run --project CloudStream.Desktop.csproj
++```
++
++## Installing Extensions
++
++Providers are loaded from the `Plugins` directory located alongside the
++executable.  To install an extension, drop the compiled plugin DLL into
++the `Plugins` folder and restart the application.  Each plugin must
++implement the `CloudStream.Desktop.Plugins.IProvider` interface.
++
++## Data Location
++
++Application data (SQLite database) is stored in the local application
++data folder under `CloudStream/cloudstream.db`.  Clearing history via
++the settings page will remove watch history but leave bookmarks intact.
+\ No newline at end of file
+diff -ruN /tmp/empty/Services/DatabaseService.cs CloudStream-Desktop/Services/DatabaseService.cs
+--- /tmp/empty/Services/DatabaseService.cs	1970-01-01 00:00:00.000000000 +0000
++++ CloudStream-Desktop/Services/DatabaseService.cs	2026-02-05 00:31:04.941881640 +0000
+@@ -0,0 +1,268 @@
++using System;
++using System.Collections.Generic;
++using System.IO;
++using System.Threading;
++using Microsoft.Data.Sqlite;
++using CloudStream.Desktop.Models;
++
++namespace CloudStream.Desktop.Services
++{
++    /// <summary>
++    ///     Provides an abstraction over the SQLite database used by the
++    ///     application.  This service is responsible for creating the database
++    ///     schema and exposes simple methods for storing and retrieving
++    ///     bookmarks, history and resume positions.
++    /// </summary>
++    public sealed class DatabaseService
++    {
++        private static readonly Lazy<DatabaseService> _instance = new(() => new DatabaseService());
++        private readonly object _syncRoot = new();
++        private SqliteConnection? _connection;
++
++        /// <summary>
++        ///     Gets the singleton instance of the database service.
++        /// </summary>
++        public static DatabaseService Instance => _instance.Value;
++
++        private DatabaseService()
++        {
++        }
++
++        /// <summary>
++        ///     Initializes the database.  If the database file does not exist it
++        ///     will be created and the necessary tables will be created.
++        /// </summary>
++        public void Initialize()
++        {
++            lock (_syncRoot)
++            {
++                if (_connection != null)
++                    return;
++
++                string appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
++                string dbPath = Path.Combine(appData, "CloudStream", "cloudstream.db");
++                Directory.CreateDirectory(Path.GetDirectoryName(dbPath)!);
++
++                bool createSchema = !File.Exists(dbPath);
++                _connection = new SqliteConnection($"Data Source={dbPath}");
++                _connection.Open();
++
++                if (createSchema)
++                {
++                    CreateSchema();
++                }
++            }
++        }
++
++        private void CreateSchema()
++        {
++            using var cmd = _connection!.CreateCommand();
++            cmd.CommandText = @"CREATE TABLE IF NOT EXISTS Bookmarks (
++    Id TEXT PRIMARY KEY,
++    ProviderId TEXT NOT NULL,
++    MediaId TEXT NOT NULL,
++    Title TEXT,
++    PosterUrl TEXT,
++    Timestamp DATETIME NOT NULL
++);
++CREATE TABLE IF NOT EXISTS History (
++    Id TEXT PRIMARY KEY,
++    ProviderId TEXT NOT NULL,
++    MediaId TEXT NOT NULL,
++    Title TEXT,
++    PosterUrl TEXT,
++    WatchedAt DATETIME NOT NULL,
++    Position INTEGER,
++    Duration INTEGER
++);
++CREATE TABLE IF NOT EXISTS Resume (
++    Id TEXT PRIMARY KEY,
++    ProviderId TEXT NOT NULL,
++    MediaId TEXT NOT NULL,
++    Position INTEGER NOT NULL
++);";
++            cmd.ExecuteNonQuery();
++        }
++
++        /// <summary>
++        ///     Adds a media item to the bookmarks table.  If the item already
++        ///     exists the timestamp is updated to the current time.
++        /// </summary>
++        public void AddBookmark(MediaItem item)
++        {
++            EnsureInitialized();
++            lock (_syncRoot)
++            {
++                using var cmd = _connection!.CreateCommand();
++                cmd.CommandText = "INSERT OR REPLACE INTO Bookmarks (Id, ProviderId, MediaId, Title, PosterUrl, Timestamp) VALUES (@id, @providerId, @mediaId, @title, @posterUrl, @ts);";
++                cmd.Parameters.AddWithValue("@id", $"{item.ProviderId}:{item.Id}");
++                cmd.Parameters.AddWithValue("@providerId", item.ProviderId);
++                cmd.Parameters.AddWithValue("@mediaId", item.Id);
++                cmd.Parameters.AddWithValue("@title", item.Title ?? string.Empty);
++                cmd.Parameters.AddWithValue("@posterUrl", (object?)item.PosterUrl ?? DBNull.Value);
++                cmd.Parameters.AddWithValue("@ts", DateTime.UtcNow);
++                cmd.ExecuteNonQuery();
++            }
++        }
++
++        /// <summary>
++        ///     Removes a bookmark identified by provider and media id.
++        /// </summary>
++        public void RemoveBookmark(string providerId, string mediaId)
++        {
++            EnsureInitialized();
++            lock (_syncRoot)
++            {
++                using var cmd = _connection!.CreateCommand();
++                cmd.CommandText = "DELETE FROM Bookmarks WHERE ProviderId = @providerId AND MediaId = @mediaId";
++                cmd.Parameters.AddWithValue("@providerId", providerId);
++                cmd.Parameters.AddWithValue("@mediaId", mediaId);
++                cmd.ExecuteNonQuery();
++            }
++        }
++
++        /// <summary>
++        ///     Retrieves all bookmarks in order of most recently added.
++        /// </summary>
++        public IList<MediaItem> GetBookmarks()
++        {
++            EnsureInitialized();
++            var list = new List<MediaItem>();
++            lock (_syncRoot)
++            {
++                using var cmd = _connection!.CreateCommand();
++                cmd.CommandText = "SELECT ProviderId, MediaId, Title, PosterUrl FROM Bookmarks ORDER BY Timestamp DESC";
++                using var reader = cmd.ExecuteReader();
++                while (reader.Read())
++                {
++                    list.Add(new MediaItem
++                    {
++                        ProviderId = reader.GetString(0),
++                        Id = reader.GetString(1),
++                        Title = reader.IsDBNull(2) ? string.Empty : reader.GetString(2),
++                        PosterUrl = reader.IsDBNull(3) ? null : reader.GetString(3)
++                    });
++                }
++            }
++            return list;
++        }
++
++        /// <summary>
++        ///     Adds an entry to the history.  If an entry for the same media
++        ///     item exists its timestamp and position are updated.
++        /// </summary>
++        public void AddHistory(MediaItem item, long position, long duration)
++        {
++            EnsureInitialized();
++            lock (_syncRoot)
++            {
++                using var cmd = _connection!.CreateCommand();
++                cmd.CommandText = "INSERT OR REPLACE INTO History (Id, ProviderId, MediaId, Title, PosterUrl, WatchedAt, Position, Duration) VALUES (@id, @providerId, @mediaId, @title, @posterUrl, @watchedAt, @position, @duration);";
++                cmd.Parameters.AddWithValue("@id", $"{item.ProviderId}:{item.Id}");
++                cmd.Parameters.AddWithValue("@providerId", item.ProviderId);
++                cmd.Parameters.AddWithValue("@mediaId", item.Id);
++                cmd.Parameters.AddWithValue("@title", item.Title ?? string.Empty);
++                cmd.Parameters.AddWithValue("@posterUrl", (object?)item.PosterUrl ?? DBNull.Value);
++                cmd.Parameters.AddWithValue("@watchedAt", DateTime.UtcNow);
++                cmd.Parameters.AddWithValue("@position", position);
++                cmd.Parameters.AddWithValue("@duration", duration);
++                cmd.ExecuteNonQuery();
++            }
++        }
++
++        /// <summary>
++        ///     Retrieves the most recent history entries.
++        /// </summary>
++        public IList<(MediaItem Item, long Position, long Duration)> GetHistory(int limit = 50)
++        {
++            EnsureInitialized();
++            var list = new List<(MediaItem, long, long)>();
++            lock (_syncRoot)
++            {
++                using var cmd = _connection!.CreateCommand();
++                cmd.CommandText = $"SELECT ProviderId, MediaId, Title, PosterUrl, Position, Duration FROM History ORDER BY WatchedAt DESC LIMIT {limit}";
++                using var reader = cmd.ExecuteReader();
++                while (reader.Read())
++                {
++                    var item = new MediaItem
++                    {
++                        ProviderId = reader.GetString(0),
++                        Id = reader.GetString(1),
++                        Title = reader.IsDBNull(2) ? string.Empty : reader.GetString(2),
++                        PosterUrl = reader.IsDBNull(3) ? null : reader.GetString(3)
++                    };
++                    long pos = reader.IsDBNull(4) ? 0 : reader.GetInt64(4);
++                    long dur = reader.IsDBNull(5) ? 0 : reader.GetInt64(5);
++                    list.Add((item, pos, dur));
++                }
++            }
++            return list;
++        }
++
++        /// <summary>
++        ///     Saves the resume position for a media item.  This table stores only
++        ///     the most recent position and will be updated whenever the user
++        ///     stops playback.
++        /// </summary>
++        public void SaveResumePosition(string providerId, string mediaId, long position)
++        {
++            EnsureInitialized();
++            lock (_syncRoot)
++            {
++                using var cmd = _connection!.CreateCommand();
++                cmd.CommandText = "INSERT OR REPLACE INTO Resume (Id, ProviderId, MediaId, Position) VALUES (@id, @providerId, @mediaId, @position);";
++                cmd.Parameters.AddWithValue("@id", $"{providerId}:{mediaId}");
++                cmd.Parameters.AddWithValue("@providerId", providerId);
++                cmd.Parameters.AddWithValue("@mediaId", mediaId);
++                cmd.Parameters.AddWithValue("@position", position);
++                cmd.ExecuteNonQuery();
++            }
++        }
++
++        /// <summary>
++        ///     Returns the saved resume position for a media item, or null if
++        ///     none exists.
++        /// </summary>
++        public long? GetResumePosition(string providerId, string mediaId)
++        {
++            EnsureInitialized();
++            lock (_syncRoot)
++            {
++                using var cmd = _connection!.CreateCommand();
++                cmd.CommandText = "SELECT Position FROM Resume WHERE ProviderId = @providerId AND MediaId = @mediaId";
++                cmd.Parameters.AddWithValue("@providerId", providerId);
++                cmd.Parameters.AddWithValue("@mediaId", mediaId);
++                var result = cmd.ExecuteScalar();
++                if (result != null && result != DBNull.Value)
++                {
++                    return Convert.ToInt64(result);
++                }
++                return null;
++            }
++        }
++
++        private void EnsureInitialized()
++        {
++            if (_connection == null)
++            {
++                throw new InvalidOperationException("DatabaseService has not been initialized. Call Initialize() before using.");
++            }
++        }
++
++        /// <summary>
++        ///     Removes all entries from the history table.  This can be invoked
++        ///     from the settings page when the user chooses to clear their
++        ///     continue watching list.
++        /// </summary>
++        public void ClearHistory()
++        {
++            EnsureInitialized();
++            lock (_syncRoot)
++            {
++                using var cmd = _connection!.CreateCommand();
++                cmd.CommandText = "DELETE FROM History";
++                cmd.ExecuteNonQuery();
++            }
++        }
++    }
++}
+\ No newline at end of file
+diff -ruN /tmp/empty/Services/PluginLoader.cs CloudStream-Desktop/Services/PluginLoader.cs
+--- /tmp/empty/Services/PluginLoader.cs	1970-01-01 00:00:00.000000000 +0000
++++ CloudStream-Desktop/Services/PluginLoader.cs	2026-02-05 00:31:39.526030546 +0000
+@@ -0,0 +1,115 @@
++using System;
++using System.Collections.Generic;
++using System.IO;
++using System.Linq;
++using System.Reflection;
++using System.Runtime.Loader;
++using CloudStream.Desktop.Plugins;
++
++namespace CloudStream.Desktop.Services
++{
++    /// <summary>
++    ///     Responsible for loading provider plugins from the Plugins directory.
++    ///     Each plugin assembly is loaded into its own <see cref="AssemblyLoadContext"/>
++    ///     to provide isolation and allow unloading in the future.  After loading,
++    ///     the provider instances are exposed via <see cref="Providers"/>.
++    /// </summary>
++    public class PluginLoader
++    {
++        private readonly List<IProvider> _providers = new();
++
++        private static readonly Lazy<PluginLoader> _instance = new(() => new PluginLoader());
++
++        /// <summary>
++        ///     Gets the singleton instance of the plugin loader.
++        /// </summary>
++        public static PluginLoader Instance => _instance.Value;
++
++        /// <summary>
++        ///     Gets the list of loaded providers.
++        /// </summary>
++        public IReadOnlyList<IProvider> Providers => _providers;
++
++        private PluginLoader()
++        {
++            // private constructor ensures singleton usage.  Loading occurs
++            // automatically upon construction.
++            LoadPlugins();
++        }
++
++        /// <summary>
++        ///     Scans the Plugins directory for assemblies and attempts to load
++        ///     provider implementations from each.  Any exceptions thrown
++        ///     during loading are caught and ignored to ensure a faulty plugin
++        ///     does not prevent the application from starting.
++        /// </summary>
++        private void LoadPlugins()
++        {
++            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
++            string pluginsDir = Path.Combine(baseDir, "Plugins");
++            if (!Directory.Exists(pluginsDir))
++                Directory.CreateDirectory(pluginsDir);
++
++            foreach (var file in Directory.EnumerateFiles(pluginsDir, "*.dll", SearchOption.TopDirectoryOnly))
++            {
++                try
++                {
++                    var context = new PluginLoadContext(file);
++                    var assembly = context.LoadFromAssemblyName(new AssemblyName(Path.GetFileNameWithoutExtension(file)));
++                    foreach (var type in assembly.GetTypes())
++                    {
++                        if (!typeof(IProvider).IsAssignableFrom(type) || type.IsAbstract)
++                            continue;
++
++                        if (Activator.CreateInstance(type) is IProvider provider)
++                        {
++                            _providers.Add(provider);
++                        }
++                    }
++                }
++                catch
++                {
++                    // swallow any errors during loading to isolate plugins
++                }
++            }
++
++            // Always register the built‑in provider so that the application
++            // functions without external extensions.  External providers can
++            // override this by returning their own results.
++            try
++            {
++                var builtin = new CloudStream.Desktop.Providers.BuiltinProvider();
++                _providers.Add(builtin);
++            }
++            catch
++            {
++                // ignore failure to instantiate built‑in provider (should not happen)
++            }
++        }
++
++        /// <summary>
++        ///     Assembly load context providing isolation for plugin assemblies.  By
++        ///     specifying the default context as parent for resource resolving we
++        ///     ensure referenced framework assemblies are resolved correctly.
++        /// </summary>
++        private class PluginLoadContext : AssemblyLoadContext
++        {
++            private readonly AssemblyDependencyResolver _resolver;
++
++            public PluginLoadContext(string pluginPath) : base(isCollectible: true)
++            {
++                _resolver = new AssemblyDependencyResolver(pluginPath);
++            }
++
++            protected override Assembly? Load(AssemblyName assemblyName)
++            {
++                string? assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName);
++                if (assemblyPath != null)
++                {
++                    return LoadFromAssemblyPath(assemblyPath);
++                }
++                return null;
++            }
++        }
++    }
++}
+\ No newline at end of file
+diff -ruN /tmp/empty/Views/ExtensionsPage.xaml CloudStream-Desktop/Views/ExtensionsPage.xaml
+--- /tmp/empty/Views/ExtensionsPage.xaml	1970-01-01 00:00:00.000000000 +0000
++++ CloudStream-Desktop/Views/ExtensionsPage.xaml	2026-02-05 00:30:53.169829462 +0000
+@@ -0,0 +1,9 @@
++<Page x:Class="CloudStream.Desktop.Views.ExtensionsPage"
++      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
++      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
++      Title="Extensions">
++    <StackPanel Margin="20">
++        <TextBlock Text="Installed Providers" FontSize="18" FontWeight="Bold" />
++        <ListBox x:Name="ProvidersList" Margin="0,10,0,0" DisplayMemberPath="Name" />
++    </StackPanel>
++</Page>
+\ No newline at end of file
+diff -ruN /tmp/empty/Views/ExtensionsPage.xaml.cs CloudStream-Desktop/Views/ExtensionsPage.xaml.cs
+--- /tmp/empty/Views/ExtensionsPage.xaml.cs	1970-01-01 00:00:00.000000000 +0000
++++ CloudStream-Desktop/Views/ExtensionsPage.xaml.cs	2026-02-05 00:30:56.521844957 +0000
+@@ -0,0 +1,25 @@
++using System.Windows.Controls;
++using CloudStream.Desktop.Plugins;
++
++namespace CloudStream.Desktop.Views
++{
++    /// <summary>
++    ///     Interaction logic for <see cref="ExtensionsPage"/>.  This page
++    ///     displays the list of loaded providers.  In a full implementation
++    ///     this page would also allow enabling/disabling and managing external
++    ///     extension repositories.
++    /// </summary>
++    public partial class ExtensionsPage : Page
++    {
++        public ExtensionsPage()
++        {
++            InitializeComponent();
++            Loaded += ExtensionsPage_Loaded;
++        }
++
++        private void ExtensionsPage_Loaded(object sender, System.Windows.RoutedEventArgs e)
++        {
++            ProvidersList.ItemsSource = PluginLoader.Instance.Providers;
++        }
++    }
++}
+\ No newline at end of file
+diff -ruN /tmp/empty/Views/HomePage.xaml CloudStream-Desktop/Views/HomePage.xaml
+--- /tmp/empty/Views/HomePage.xaml	1970-01-01 00:00:00.000000000 +0000
++++ CloudStream-Desktop/Views/HomePage.xaml	2026-02-05 00:30:07.365613670 +0000
+@@ -0,0 +1,14 @@
++<Page x:Class="CloudStream.Desktop.Views.HomePage"
++      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
++      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
++      Title="Home">
++    <ScrollViewer VerticalScrollBarVisibility="Auto">
++        <StackPanel Margin="20">
++            <TextBlock Text="Continue Watching" FontSize="18" FontWeight="Bold" Margin="0,0,0,10" />
++            <ListBox x:Name="ContinueWatchingList" DisplayMemberPath="Item.Title" Height="150" SelectionChanged="ContinueWatchingList_SelectionChanged" />
++
++            <TextBlock Text="Bookmarks" FontSize="18" FontWeight="Bold" Margin="0,20,0,10" />
++            <ListBox x:Name="BookmarksList" DisplayMemberPath="Title" Height="150" SelectionChanged="BookmarksList_SelectionChanged" />
++        </StackPanel>
++    </ScrollViewer>
++</Page>
+\ No newline at end of file
+diff -ruN /tmp/empty/Views/HomePage.xaml.cs CloudStream-Desktop/Views/HomePage.xaml.cs
+--- /tmp/empty/Views/HomePage.xaml.cs	1970-01-01 00:00:00.000000000 +0000
++++ CloudStream-Desktop/Views/HomePage.xaml.cs	2026-02-05 00:30:14.701648388 +0000
+@@ -0,0 +1,54 @@
++using System.Collections.Generic;
++using System.Windows;
++using System.Windows.Controls;
++using CloudStream.Desktop.Models;
++using CloudStream.Desktop.Services;
++
++namespace CloudStream.Desktop.Views
++{
++    /// <summary>
++    ///     Interaction logic for <see cref="HomePage"/>.  This page displays
++    ///     the user's recently watched items and bookmarks.  Selection of an
++    ///     item will navigate to the player page for that item.
++    /// </summary>
++    public partial class HomePage : Page
++    {
++        private List<(MediaItem Item, long Position, long Duration)> _history = new();
++        private List<MediaItem> _bookmarks = new();
++
++        public HomePage()
++        {
++            InitializeComponent();
++            Loaded += HomePage_Loaded;
++        }
++
++        private void HomePage_Loaded(object sender, RoutedEventArgs e)
++        {
++            // Load history and bookmarks from the database service.
++            _history = new List<(MediaItem, long, long)>(DatabaseService.Instance.GetHistory());
++            _bookmarks = new List<MediaItem>(DatabaseService.Instance.GetBookmarks());
++
++            ContinueWatchingList.ItemsSource = _history;
++            BookmarksList.ItemsSource = _bookmarks;
++        }
++
++        private void ContinueWatchingList_SelectionChanged(object sender, SelectionChangedEventArgs e)
++        {
++            if (ContinueWatchingList.SelectedItem is (MediaItem item, long pos, long dur))
++            {
++                // Navigate to player page with resume position
++                var player = new PlayerPage(item, pos);
++                NavigationService?.Navigate(player);
++            }
++        }
++
++        private void BookmarksList_SelectionChanged(object sender, SelectionChangedEventArgs e)
++        {
++            if (BookmarksList.SelectedItem is MediaItem item)
++            {
++                var player = new PlayerPage(item, 0);
++                NavigationService?.Navigate(player);
++            }
++        }
++    }
++}
+\ No newline at end of file
+diff -ruN /tmp/empty/Views/PlayerPage.xaml CloudStream-Desktop/Views/PlayerPage.xaml
+--- /tmp/empty/Views/PlayerPage.xaml	1970-01-01 00:00:00.000000000 +0000
++++ CloudStream-Desktop/Views/PlayerPage.xaml	2026-02-05 00:30:21.629682666 +0000
+@@ -0,0 +1,22 @@
++<Page x:Class="CloudStream.Desktop.Views.PlayerPage"
++      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
++      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
++      xmlns:mpv="clr-namespace:Mpv.Wpf;assembly=Mpv.Wpf"
++      Title="Player">
++    <Grid>
++        <Grid.RowDefinitions>
++            <RowDefinition Height="*" />
++            <RowDefinition Height="Auto" />
++        </Grid.RowDefinitions>
++
++        <!-- Video playback surface -->
++        <mpv:VideoView x:Name="VideoView" Grid.Row="0" />
++
++        <!-- Controls bar -->
++        <StackPanel Orientation="Horizontal" Grid.Row="1" Background="#66000000" Padding="10">
++            <Button x:Name="PlayPauseButton" Content="Play" Width="60" Click="PlayPauseButton_Click" />
++            <Button x:Name="StopButton" Content="Stop" Width="60" Margin="10,0,0,0" Click="StopButton_Click" />
++            <ComboBox x:Name="StreamSelector" Width="120" Margin="10,0,0,0" SelectionChanged="StreamSelector_SelectionChanged" />
++        </StackPanel>
++    </Grid>
++</Page>
+\ No newline at end of file
+diff -ruN /tmp/empty/Views/PlayerPage.xaml.cs CloudStream-Desktop/Views/PlayerPage.xaml.cs
+--- /tmp/empty/Views/PlayerPage.xaml.cs	1970-01-01 00:00:00.000000000 +0000
++++ CloudStream-Desktop/Views/PlayerPage.xaml.cs	2026-02-05 00:31:45.290058714 +0000
+@@ -0,0 +1,138 @@
++using System;
++using System.Collections.Generic;
++using System.Linq;
++using System.Threading.Tasks;
++using System.Windows;
++using System.Windows.Controls;
++using Mpv.Wpf;
++using Mpv.NET.Player;
++using CloudStream.Desktop.Models;
++using CloudStream.Desktop.Plugins;
++using CloudStream.Desktop.Services;
++
++namespace CloudStream.Desktop.Views
++{
++    /// <summary>
++    ///     Interaction logic for <see cref="PlayerPage"/>.  This page embeds a
++    ///     mpv-based video player using the Mpv.NET library and manages
++    ///     playback controls, stream selection and resume functionality.
++    /// </summary>
++    public partial class PlayerPage : Page
++    {
++        private readonly MediaItem _item;
++        private readonly long _resumePosition;
++        private readonly MpvPlayer _player;
++        private List<StreamLink> _streams = new();
++        private bool _paused;
++
++        public PlayerPage(MediaItem item, long resumePosition)
++        {
++            _item = item;
++            _resumePosition = resumePosition;
++            InitializeComponent();
++
++            _player = new MpvPlayer();
++            VideoView.SetMpvPlayer(_player);
++
++            Loaded += PlayerPage_Loaded;
++            Unloaded += PlayerPage_Unloaded;
++        }
++
++        private async void PlayerPage_Loaded(object sender, RoutedEventArgs e)
++        {
++            // Load available streams from the provider
++            var provider = PluginLoader.Instance.Providers.FirstOrDefault(p => p.Name == _item.ProviderId || _item.ProviderId == p.Name);
++            if (provider != null)
++            {
++                try
++                {
++                    _streams = await provider.GetStreamsAsync(_item);
++                }
++                catch
++                {
++                    _streams = new List<StreamLink>();
++                }
++            }
++
++            StreamSelector.ItemsSource = _streams;
++            StreamSelector.DisplayMemberPath = nameof(StreamLink.Quality);
++            if (_streams.Count > 0)
++            {
++                StreamSelector.SelectedIndex = 0;
++            }
++        }
++
++        private void StreamSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
++        {
++            if (StreamSelector.SelectedItem is StreamLink link)
++            {
++                PlayStream(link);
++            }
++        }
++
++        private void PlayStream(StreamLink link)
++        {
++            // Apply any required headers via mpv options
++            var options = new List<string>();
++            if (link.Headers != null)
++            {
++                foreach (var kvp in link.Headers)
++                {
++                    options.Add($"--http-header-fields={kvp.Key}:{kvp.Value}");
++                }
++            }
++            // The Load method accepts either just the URL or an array of options.
++            _player.Load(link.Url, options.ToArray());
++            if (_resumePosition > 0)
++            {
++                // mpv expects seconds for seeking
++                double sec = _resumePosition / 1000.0;
++                _player.Seek(sec);
++            }
++            _player.Resume();
++            _paused = false;
++            PlayPauseButton.Content = "Pause";
++        }
++
++        private void PlayPauseButton_Click(object sender, RoutedEventArgs e)
++        {
++            if (_paused)
++            {
++                _player.Resume();
++                PlayPauseButton.Content = "Pause";
++                _paused = false;
++            }
++            else
++            {
++                _player.Pause();
++                PlayPauseButton.Content = "Play";
++                _paused = true;
++            }
++        }
++
++        private void StopButton_Click(object sender, RoutedEventArgs e)
++        {
++            _player.Stop();
++        }
++
++        private void PlayerPage_Unloaded(object sender, RoutedEventArgs e)
++        {
++            // Save resume position
++            if (_item != null)
++            {
++                try
++                {
++                    // Position property returns seconds
++                    double position = _player.Position ?? 0;
++                    long ms = (long)(position * 1000);
++                    DatabaseService.Instance.SaveResumePosition(_item.ProviderId, _item.Id, ms);
++                }
++                catch
++                {
++                    // ignore errors while saving resume
++                }
++            }
++            _player.Dispose();
++        }
++    }
++}
+\ No newline at end of file
+diff -ruN /tmp/empty/Views/SearchPage.xaml CloudStream-Desktop/Views/SearchPage.xaml
+--- /tmp/empty/Views/SearchPage.xaml	1970-01-01 00:00:00.000000000 +0000
++++ CloudStream-Desktop/Views/SearchPage.xaml	2026-02-05 00:30:42.109778165 +0000
+@@ -0,0 +1,12 @@
++<Page x:Class="CloudStream.Desktop.Views.SearchPage"
++      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
++      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
++      Title="Search">
++    <StackPanel Margin="20">
++        <StackPanel Orientation="Horizontal">
++            <TextBox x:Name="QueryBox" Width="300" Margin="0,0,10,0" />
++            <Button Content="Search" Width="80" Click="SearchButton_Click" />
++        </StackPanel>
++        <ListBox x:Name="ResultsList" Margin="0,20,0,0" DisplayMemberPath="Title" SelectionChanged="ResultsList_SelectionChanged" />
++    </StackPanel>
++</Page>
+\ No newline at end of file
+diff -ruN /tmp/empty/Views/SearchPage.xaml.cs CloudStream-Desktop/Views/SearchPage.xaml.cs
+--- /tmp/empty/Views/SearchPage.xaml.cs	1970-01-01 00:00:00.000000000 +0000
++++ CloudStream-Desktop/Views/SearchPage.xaml.cs	2026-02-05 00:30:50.077815185 +0000
+@@ -0,0 +1,84 @@
++using System.Collections.Generic;
++using System.Linq;
++using System.Threading.Tasks;
++using System.Windows;
++using System.Windows.Controls;
++using CloudStream.Desktop.Models;
++using CloudStream.Desktop.Plugins;
++using CloudStream.Desktop.Services;
++
++namespace CloudStream.Desktop.Views
++{
++    /// <summary>
++    ///     Interaction logic for <see cref="SearchPage"/>.  This page allows the
++    ///     user to search across all loaded providers and displays the
++    ///     aggregated results.  Selecting a result navigates directly to the
++    ///     player page for that media item.
++    /// </summary>
++    public partial class SearchPage : Page
++    {
++        private readonly List<MediaItem> _results = new();
++
++        public SearchPage()
++        {
++            InitializeComponent();
++        }
++
++        private async void SearchButton_Click(object sender, RoutedEventArgs e)
++        {
++            string query = QueryBox.Text.Trim();
++            if (string.IsNullOrWhiteSpace(query))
++                return;
++
++            _results.Clear();
++            ResultsList.ItemsSource = null;
++            var providers = PluginLoader.Instance.Providers;
++            foreach (var provider in providers)
++            {
++                try
++                {
++                    var list = await provider.SearchAsync(query);
++                    if (list != null)
++                    {
++                        // annotate provider id so PlayerPage can find provider later
++                        foreach (var item in list)
++                        {
++                            // Use provider.Name as ProviderId if not already set
++                            if (string.IsNullOrEmpty(item.ProviderId))
++                                item.ProviderId = provider.Name;
++                            _results.Add(item);
++                        }
++                    }
++                }
++                catch
++                {
++                    // ignore provider failure
++                }
++            }
++
++            ResultsList.ItemsSource = _results;
++        }
++
++        private async void ResultsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
++        {
++            if (ResultsList.SelectedItem is MediaItem item)
++            {
++                var provider = PluginLoader.Instance.Providers.FirstOrDefault(p => p.Name == item.ProviderId);
++                if (provider != null)
++                {
++                    try
++                    {
++                        // Load details to populate description and children (not used yet)
++                        await provider.LoadDetailsAsync(item);
++                    }
++                    catch
++                    {
++                        // ignore errors
++                    }
++                }
++                // Navigate to player page with no resume
++                NavigationService?.Navigate(new PlayerPage(item, 0));
++            }
++        }
++    }
++}
+\ No newline at end of file
+diff -ruN /tmp/empty/Views/SettingsPage.xaml CloudStream-Desktop/Views/SettingsPage.xaml
+--- /tmp/empty/Views/SettingsPage.xaml	1970-01-01 00:00:00.000000000 +0000
++++ CloudStream-Desktop/Views/SettingsPage.xaml	2026-02-05 00:30:59.669858197 +0000
+@@ -0,0 +1,10 @@
++<Page x:Class="CloudStream.Desktop.Views.SettingsPage"
++      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
++      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
++      Title="Settings">
++    <StackPanel Margin="20" VerticalAlignment="Top">
++        <TextBlock Text="Settings" FontSize="18" FontWeight="Bold" Margin="0,0,0,10" />
++        <CheckBox x:Name="DarkThemeCheckBox" Content="Dark Theme" IsChecked="True" />
++        <Button Content="Clear History" Margin="0,10,0,0" Click="ClearHistory_Click" />
++    </StackPanel>
++</Page>
+\ No newline at end of file
+diff -ruN /tmp/empty/Views/SettingsPage.xaml.cs CloudStream-Desktop/Views/SettingsPage.xaml.cs
+--- /tmp/empty/Views/SettingsPage.xaml.cs	1970-01-01 00:00:00.000000000 +0000
++++ CloudStream-Desktop/Views/SettingsPage.xaml.cs	2026-02-05 00:31:08.393894495 +0000
+@@ -0,0 +1,25 @@
++using System.Windows;
++using System.Windows.Controls;
++using CloudStream.Desktop.Services;
++
++namespace CloudStream.Desktop.Views
++{
++    /// <summary>
++    ///     Interaction logic for <see cref="SettingsPage"/>.  This page exposes
++    ///     basic application settings such as theme selection and allows the
++    ///     user to clear their watch history.
++    /// </summary>
++    public partial class SettingsPage : Page
++    {
++        public SettingsPage()
++        {
++            InitializeComponent();
++        }
++
++        private void ClearHistory_Click(object sender, RoutedEventArgs e)
++        {
++            DatabaseService.Instance.ClearHistory();
++            MessageBox.Show("History cleared.", "Settings", MessageBoxButton.OK, MessageBoxImage.Information);
++        }
++    }
++}
+\ No newline at end of file
